@@ -12,16 +12,46 @@ server/wdtt-server
 
 # Output
 server/coverage.out
+server/race*.out
+server/cpu*.out
+server/mem*.out
+*.pprof
 
 # OS
 .DS_Store
 Thumbs.db
+.directory
+*.swp
+*.swo
+*~
 
 # IDE
 .idea/
 .vscode/
-*.swp
-*.swo
+*.iml
+.project
+.classpath
+.settings/
 
 # Config override
 server/config.json
+
+# Environment
+.env
+.env.local
+
+# Logs
+*.log
+/var/log/wdtt/
+
+# Data
+passwords.json
+wg-keys.dat
+server.log
+
+# Ansible
+ansible/*.retry
+
+# Deploy artifacts
+*.tar.gz
+*.tgz
