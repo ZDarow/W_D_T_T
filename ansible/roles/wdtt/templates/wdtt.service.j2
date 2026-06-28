@@ -1,0 +1,19 @@
+[Unit]
+Description=WDTT — WireGuard over TURN Tunnel Server
+Documentation=https://github.com/ZDarow/proxy-turn-vk-android
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/local/bin/wdtt-start.sh
+Restart=always
+RestartSec=5
+LimitNOFILE=65536
+TasksMax=2048
+MemoryMax={{ wdtt_memory_max | default('512M') }}
+CPUQuota={{ wdtt_cpu_quota | default('80%') }}
+
+[Install]
+WantedBy=multi-user.target

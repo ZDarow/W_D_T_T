@@ -1,0 +1,61 @@
+---
+# ==================== WDTT Ansible Playbook ====================
+# Полная установка WDTT-сервера на clean VPS.
+#
+# Использование:
+#   ansible-playbook -i inventory/production playbook.yml
+#
+# Переменные (в командной строке или group_vars):
+#   wdtt_main_password  — мастер-пароль (обязательно)
+#   wdtt_admin_id       — Telegram Admin ID (опционально)
+#   wdtt_bot_token      — Telegram Bot Token (опционально)
+#   wdtt_dns            — DNS для клиентов (по умолч. 1.1.1.1)
+#   wdtt_salamander_key — ключ обфускации (опционально)
+#   wdtt_jitter         — рандомизация таймингов (по умолч. false)
+#
+# Пример:
+#   ansible-playbook -i inventory/production playbook.yml \
+#     -e wdtt_main_password=super_secret \
+#     -e wdtt_jitter=true
+# ==============================================================
+
+- name: Установка WDTT-сервера
+  hosts: wdtt_servers
+  become: yes
+  gather_facts: yes
+
+  vars:
+    # Обязательные
+    wdtt_main_password: ""
+    # Опциональные
+    wdtt_admin_id: ""
+    wdtt_bot_token: ""
+    wdtt_dns: "1.1.1.1"
+    wdtt_listen: "0.0.0.0:56000"
+    wdtt_dtls_port: 56000
+    wdtt_wg_port: 56001
+    wdtt_tun_port: 9000
+    wdtt_salamander_key: ""
+    wdtt_jitter: false
+    wdtt_memory_max: "512M"
+    wdtt_cpu_quota: "80%"
+    wdtt_configure_firewall: true
+
+  pre_tasks:
+    - name: Проверить мастер-пароль
+      fail:
+        msg: "❌ wdtt_main_password не задан! Используйте -e wdtt_main_password=..."
+      when: wdtt_main_password | length == 0
+
+  roles:
+    - role: wdtt
+
+  post_tasks:
+    - name: Показать статус сервиса
+      command: systemctl status wdtt --no-pager
+      register: wdtt_status
+      changed_when: false
+
+    - name: Вывести статус
+      debug:
+        msg: "{{ wdtt_status.stdout_lines[:15] }}"

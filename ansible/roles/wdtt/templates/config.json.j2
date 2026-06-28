@@ -1,0 +1,10 @@
+{
+  "password": "{{ wdtt_main_password }}",
+  "admin": "{{ wdtt_admin_id | default('') }}",
+  "bot_token": "{{ wdtt_bot_token | default('') }}",
+  "dns": "{{ wdtt_dns | default('1.1.1.1') }}",
+  "listen": "{{ wdtt_listen | default('0.0.0.0:56000') }}",
+  "wg_port": {{ wdtt_wg_port | default(56001) }},
+  "salamander_key": "{{ wdtt_salamander_key | default('') }}",
+  "jitter": {{ wdtt_jitter | default(false) | bool | lower }}
+}

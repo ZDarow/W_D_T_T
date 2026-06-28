@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache: true
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          working-directory: server
+          args: --timeout=5m
+
+  vet:
+    name: Vet
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache: true
+
+      - name: go vet
+        working-directory: server
+        run: go vet ./...
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache: true
+
+      - name: Static build
+        working-directory: server
+        run: CGO_ENABLED=0 go build -ldflags='-s -w' -o wdtt-server .
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: wdtt-server
+          path: server/wdtt-server
+          retention-days: 7
+
+  mod-check:
+    name: Module check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache: true
+
+      - name: go mod tidy
+        working-directory: server
+        run: go mod tidy
+
+      - name: Check dirty
+        working-directory: server
+        run: |
+          if [ -n "$(git status --porcelain go.mod go.sum)" ]; then
+            echo "❌ go.mod или go.sum не синхронизированы. Запустите 'go mod tidy'"
+            git diff go.mod go.sum
+            exit 1
+          fi

@@ -1,0 +1,66 @@
+---
+# ==================== WDTT Ansible Роль ====================
+# Установка и настройка WDTT-сервера.
+# Требования: Go >= 1.21, systemd, Linux amd64.
+# ===========================================================
+
+- name: Создать директории
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+  loop:
+    - /etc/wdtt
+    - /var/log/wdtt
+
+- name: Скопировать бинарник wdtt-server
+  copy:
+    src: wdtt-server
+    dest: /usr/local/bin/wdtt-server
+    mode: 0755
+  notify: restart wdtt
+
+- name: Скопировать стартовый скрипт
+  copy:
+    src: wdtt-start.sh
+    dest: /usr/local/bin/wdtt-start.sh
+    mode: 0755
+  notify: restart wdtt
+
+- name: Установить systemd-юнит
+  template:
+    src: wdtt.service.j2
+    dest: /etc/systemd/system/wdtt.service
+    mode: 0644
+  notify: restart wdtt
+
+- name: Создать конфиг (если нет)
+  template:
+    src: config.json.j2
+    dest: /etc/wdtt/config.json
+    mode: 0600
+  notify: restart wdtt
+
+- name: Включить и запустить сервис
+  systemd:
+    name: wdtt
+    enabled: yes
+    state: started
+    daemon_reload: yes
+
+- name: Настроить UFW
+  ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: udp
+  loop:
+    - "{{ wdtt_dtls_port }}"
+    - "{{ wdtt_wg_port }}"
+    - "{{ wdtt_tun_port }}"
+  when: wdtt_configure_firewall | default(true)
+
+handlers:
+  - name: restart wdtt
+    systemd:
+      name: wdtt
+      state: restarted

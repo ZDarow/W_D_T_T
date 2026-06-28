@@ -1,0 +1,27 @@
+# Binaries
+server/wdtt-server
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binaries
+*.test
+*.test.exe
+
+# Output
+server/coverage.out
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Config override
+server/config.json

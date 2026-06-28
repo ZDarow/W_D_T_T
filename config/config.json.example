@@ -1,0 +1,10 @@
+{
+  "password": "YOUR_MASTER_PASSWORD",
+  "admin": "",
+  "bot_token": "",
+  "dns": "1.1.1.1",
+  "listen": "0.0.0.0:56000",
+  "wg_port": 56001,
+  "salamander_key": "",
+  "jitter": false
+}
